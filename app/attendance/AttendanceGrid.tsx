@@ -5,6 +5,7 @@ import { collection, doc, getDocs, setDoc, addDoc } from 'firebase/firestore';
 import { auth, db } from '../../firebaseconfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import classNames from 'classnames';
+import { useRouter } from 'next/router';
 
 interface Student {
   id: string;
@@ -16,39 +17,40 @@ const AttendanceGrid = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [newStudentName, setNewStudentName] = useState('');
   const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'students'));
-        const studentsData: Student[] = [];
-        querySnapshot.forEach((doc) => {
-          const data = doc.data() as Omit<Student, 'id'>;
-          studentsData.push({ id: doc.id, ...data });
-        });
-        setStudents(studentsData);
-        
-      } catch (error) {
-        console.error("Error fetching students: ", error);
-      }
-    };
-
-    fetchStudents();
-  }, []);
-
+ 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log('Current User:', currentUser); // Add this log
-
       if (currentUser) {
         setUser(currentUser);
       } else {
         setUser(null);
+        
       }
     });
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (user && user.email === 'prasantshukla89@gmail.com') {
+      const fetchStudents = async () => {
+        try {
+          const querySnapshot = await getDocs(collection(db, 'students'));
+          const studentsData: Student[] = [];
+          querySnapshot.forEach((doc) => {
+            const data = doc.data() as Omit<Student, 'id'>;
+            studentsData.push({ id: doc.id, ...data });
+          });
+          setStudents(studentsData);
+          
+        } catch (error) {
+          console.error("Error fetching students: ", error);
+        }
+      };
+
+      fetchStudents();
+    }
+  }, [user]);
 
   const handleAttendanceChange = async (studentId: string, dayIndex: number, status: string) => {
     if (user?.email !== 'prasantshukla89@gmail.com') {
@@ -174,11 +176,3 @@ const AttendanceGrid = () => {
 };
 
 export default AttendanceGrid;
-
-
-
-
-
-
-
-
