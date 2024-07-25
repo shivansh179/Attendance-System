@@ -38,10 +38,10 @@ const AttendanceGrid = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log('Current User:', currentUser?.email); // Add this log
+      console.log('Current User:', currentUser); // Add this log
 
       if (currentUser) {
-        setUser(currentUser.email);
+        setUser(currentUser);
       } else {
         setUser(null);
       }
